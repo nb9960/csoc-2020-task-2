@@ -14,13 +14,11 @@ def index(request):
 def bookDetailView(request, bid):
     template_name = 'store/book_detail.html'
     books=get_object_or_404(Book, pk=bid)
-    get=BookCopy.objects.filter(books=bid, status=False)
-    count=get.count()
+    count=BookCopy.objects.filter(books__exact=bid, status__exact=True).count()
     context = {
         'book':books , # set this to an instance of the required book
         'num_available':count , # set this to the number of copies of the book available, or 0 if the book isn't available
     }
-    # START YOUR CODE HERE  
     return render(request, template_name, context=context)
 
 @csrf_exempt
@@ -31,8 +29,10 @@ def bookListView(request):
                        # (i.e. the book search feature will also be implemented in this view)
     }
     get_data = request.GET
-    # START YOUR CODE HERE
-    book=Book.objects.all()
+    if get_data.count()>0:
+        book=Book.objects.filter(title__icontains=get_data['title'], author__icontains=get_data['author'], genre__icontains=get_data['genre'])
+    else:
+        book=Book.objects.all()
     context['books']=book
     return render(request, template_name, context=context)
 
@@ -47,7 +47,7 @@ def viewLoanedBooks(request):
     BookCopy model. Only those book copies should be included which have been loaned by the user.
     '''
     # START YOUR CODE HERE
-    get=BookCopy.objects.filter(borrower=request.user)
+    get=BookCopy.objects.filter(borrower__exact=request.user)
     context['books']=get
     return render(request, template_name, context=context)
 
@@ -61,12 +61,11 @@ def loanBookView(request):
     Check if an instance of the asked book is available.
     If yes, then set the message to 'success', otherwise 'failure'
     '''
-    # START YOUR CODE HERE
     book_id =request.POST['bid']# get the book id from post data
-    ref=BookCopy.objects.filter(book_id=book_id, status=False)
+    ref=BookCopy.objects.filter(book=book_id, status=True)
     if ref:
         book=ref[0]
-        book.status=True
+        book.status=False
         book.borrower=request.user
         book.borrow_date=date.today()
         book.save()
@@ -86,6 +85,21 @@ to make this feature complete
 @csrf_exempt
 @login_required
 def returnBookView(request):
-    pass
+    response_data={
+        'message':None,
+    }
+    book_id=request.POST['bid']
+    book=BookCopy.objects.get(pk=book_id)
+    try:
+        book.borrower=None
+        book.borrow_date=None
+        book.status=True
+        book.save()
+        msg='success'
+    except:
+        msg='failure'
+    response_data['message']=msg
+    return JsonResponse(response_data)        
+
 
 
