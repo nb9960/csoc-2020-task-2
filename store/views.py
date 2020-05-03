@@ -4,6 +4,7 @@ from store.models import *
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from datetime import date
 
 # Create your views here.
 
@@ -12,15 +13,15 @@ def index(request):
 
 def bookDetailView(request, bid):
     template_name = 'store/book_detail.html'
+    books=get_object_or_404(Book, pk=bid)
+    get=BookCopy.objects.filter(books=bid, status=False)
+    count=get.count()
     context = {
-        'book': None, # set this to an instance of the required book
-        'num_available': None, # set this to the number of copies of the book available, or 0 if the book isn't available
+        'book':books , # set this to an instance of the required book
+        'num_available':count , # set this to the number of copies of the book available, or 0 if the book isn't available
     }
-    # START YOUR CODE HERE
-    
-    
+    # START YOUR CODE HERE  
     return render(request, template_name, context=context)
-
 
 @csrf_exempt
 def bookListView(request):
@@ -31,8 +32,8 @@ def bookListView(request):
     }
     get_data = request.GET
     # START YOUR CODE HERE
-    
-    
+    book=Book.objects.all()
+    context['books']=book
     return render(request, template_name, context=context)
 
 @login_required
@@ -46,9 +47,8 @@ def viewLoanedBooks(request):
     BookCopy model. Only those book copies should be included which have been loaned by the user.
     '''
     # START YOUR CODE HERE
-    
-
-
+    get=BookCopy.objects.filter(borrower=request.user)
+    context['books']=get
     return render(request, template_name, context=context)
 
 @csrf_exempt
@@ -62,9 +62,18 @@ def loanBookView(request):
     If yes, then set the message to 'success', otherwise 'failure'
     '''
     # START YOUR CODE HERE
-    book_id = None # get the book id from post data
-
-
+    book_id =request.POST['bid']# get the book id from post data
+    ref=BookCopy.objects.filter(book_id=book_id, status=False)
+    if ref:
+        book=ref[0]
+        book.status=True
+        book.borrower=request.user
+        book.borrow_date=date.today()
+        book.save()
+        msg="success"
+    else:
+        msg="failure"
+    response_data['message']=msg    
     return JsonResponse(response_data)
 
 '''
