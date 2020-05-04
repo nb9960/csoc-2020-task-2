@@ -21,6 +21,14 @@
     <dt>Available Copies:</dt>
     <dd>{{ num_available }}</dd>
 </dl>
+{% if user.is_authenticated %}
+<form action="{% url 'store:rate-book' %}" method="POST">
+	{% csrf_token %}
+	<label>Rate Book: </label>
+	<input name='rating' type='float' min='0.0' max='10.0'>
+	<button class="btn btn-primary" type="submit">Rate</button>
+</form>
+{% endif %}
 <button class="btn btn-primary" id="loan-button">Loan {{ book.title }}</button>
 <script>
 $("#loan-button").click(function(){

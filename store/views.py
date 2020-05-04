@@ -101,5 +101,29 @@ def returnBookView(request):
     response_data['message']=msg
     return JsonResponse(response_data)        
 
+@csrf_exempt
+@login_required
+def rateView(request, bid):
+    if request.method == "POST":
+        book = Book.objects.get(pk=bid)
+        rating = request.POST['rating']
+        user_rating=UserRating()
+        user_rating.book=book
+        user_rating.user=request.user
+        user_rating.rating=rating
+        r1=UserRating.objects.filter(user=request.user,book=book)
+        r1.delete()
+        rating.save()
+        copies=UserRating.objects.filter(book=book)
+        rating_sum = 0.0
+        for key in copies:
+            rating_sum += key.user_rating
+            rating_sum -= key.r1
+        book.rating = rating_sum/copies.count()
+        book.rating = round(book.rating,2)
+        book.save()
+        return redirect('store:book-list')
+    else:
+        return HttpResponse("Bad Request")
 
 

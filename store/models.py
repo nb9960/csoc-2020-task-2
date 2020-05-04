@@ -10,6 +10,7 @@ class Book(models.Model):
     mrp = models.PositiveIntegerField()
     rating = models.FloatField(default=0.0)
     user=models.ForeignKey(User,on_delete=models.CASCADE, default=None )
+    rating=models.FloatField(default=0.0)
 
     class Meta:
         ordering = ('title',)
@@ -17,6 +18,14 @@ class Book(models.Model):
     def __str__(self):
         return f'{self.title} by {self.author}'
 
+class UserRating(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    user=models.ForeignKey(User, null=True,blank=True,on_delete=models.SET_NULL)
+    rate=models.FloatField(default=0.0)
+
+    def __str__(self):
+        return f'{self.book}'
+    
 
 class BookCopy(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
