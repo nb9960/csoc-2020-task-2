@@ -9,6 +9,7 @@ class Book(models.Model):
     description = models.TextField(null=True)
     mrp = models.PositiveIntegerField()
     rating = models.FloatField(default=0.0)
+    user=models.ForeignKey(User,on_delete=models.CASCADE, default=None )
 
     class Meta:
         ordering = ('title',)

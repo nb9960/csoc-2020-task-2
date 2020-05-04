@@ -1,0 +1,13 @@
+{% extends 'store/base.html' %}
+{% block title %}
+   <title> Signup | Library</title>
+{% endblock %}    
+
+{% block content %}
+    <h1>Signup</h1>
+    <form class="site-form" action="{% url 'authentication:signup' %}" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="signup">
+    </form>
+{% endblock %}

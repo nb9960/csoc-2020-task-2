@@ -25,7 +25,7 @@
 <script>
 $("#loan-button").click(function(){
     $.ajax({
-		url: "{% url 'loan-book' %}",
+		url: "{% url 'store:loan-book' %}",
 		method: "POST",
 		data: {
 			bid: {{ book.id }}

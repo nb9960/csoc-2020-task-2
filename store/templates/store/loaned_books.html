@@ -38,7 +38,7 @@
 // Fill in this function by yourself. It should make a post call to the returnBookView and display an appropriate message
 function returnBook(bid){
     $.ajax({
-        url:"{% url 'return-book' %}",
+        url:"{% url 'store:return-book' %}",
         type:'POST',
         data:{
             bid:bid,

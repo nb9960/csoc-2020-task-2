@@ -19,18 +19,18 @@
         <div class="col-sm-2">
         {% block sidebar %}
         <ul class="sidebar-nav">
-            <li><a href="{% url 'index' %}">Home</a></li>
-            <li><a href="{% url 'book-list' %}">All books</a></li>
+            <li><a href="{% url 'store:index' %}">Home</a></li>
+            <li><a href="{% url 'store:book-list' %}">All books</a></li>
         </ul>
         
         <ul class="sidebar-nav">
         {% if user.is_authenticated %}
-            <li>User: {{ user.first_name }}</li>
-            <li><a href="{% url 'view-loaned' %}">My Borrowed</a></li>
-            <li><a href="{% url 'logout' %}">Logout</a></li>   
+            <li>User: {{ user.username }}</li>
+            <li><a href="{% url 'store:view-loaned' %}">My Borrowed</a></li>
+            <li><a href="{% url 'authentication:logout' %}">Logout</a></li>   
         {% else %}
-            <li><a href="{% url 'login'%}">Login</a></li>
-            <li><a href="{% url 'signup' %}">Signup</a></li>
+            <li><a href="{% url 'authentication:login' %}">Login</a></li>
+            <li><a href="{% url 'authentication:signup' %}">Signup</a></li>
         {% endif %} 
         </ul>
 

@@ -1,0 +1,16 @@
+{% extends 'store/base.html' %}
+{% block title %}
+   <title> Login | Library</title>
+{% endblock %}    
+
+{% block content %}
+    <h1>Login</h1>
+    <form class="site-form" action="{% url 'authentication:login' %}" method="post">
+        {% csrf_token %}
+        {{ form }}
+        {% if request.GET.next %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+        {% endif %}    
+        <input type="submit" value="Login">
+    </form>
+{% endblock %}

@@ -29,7 +29,7 @@ def bookListView(request):
                        # (i.e. the book search feature will also be implemented in this view)
     }
     get_data = request.GET
-    if get_data.count()>0:
+    if (len(get_data)>0):
         book=Book.objects.filter(title__icontains=get_data['title'], author__icontains=get_data['author'], genre__icontains=get_data['genre'])
     else:
         book=Book.objects.all()
