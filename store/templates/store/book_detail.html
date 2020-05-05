@@ -22,10 +22,10 @@
     <dd>{{ num_available }}</dd>
 </dl>
 {% if user.is_authenticated %}
-<form action="{% url 'store:rate-book' %}" method="POST">
+<form action="{% url 'store:rate-book' book.id %}" method="POST">
 	{% csrf_token %}
 	<label>Rate Book: </label>
-	<input name='rating' type='float' min='0.0' max='10.0'>
+	<input name='user_rating' type='float' min='0.0' max='10.0' placeholder='{{book.rating}}'>
 	<button class="btn btn-primary" type="submit">Rate</button>
 </form>
 {% endif %}

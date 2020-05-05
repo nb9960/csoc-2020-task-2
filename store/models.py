@@ -9,8 +9,6 @@ class Book(models.Model):
     description = models.TextField(null=True)
     mrp = models.PositiveIntegerField()
     rating = models.FloatField(default=0.0)
-    user=models.ForeignKey(User,on_delete=models.CASCADE, default=None )
-    rating=models.FloatField(default=0.0)
 
     class Meta:
         ordering = ('title',)
@@ -21,17 +19,17 @@ class Book(models.Model):
 class UserRating(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     user=models.ForeignKey(User, null=True,blank=True,on_delete=models.SET_NULL)
-    rate=models.FloatField(default=0.0)
+    rating=models.FloatField(default=0.0)
 
     def __str__(self):
-        return f'{self.book}'
-    
+        return f'{self.book}' 
 
 class BookCopy(models.Model):
+    # id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     borrow_date = models.DateField(null=True, blank=True)
     # True status means that the copy is available for issue, False means unavailable
-    status = models.BooleanField(default=False)
+    status = models.BooleanField(default=True)
     borrower = models.ForeignKey(User, related_name='borrower', null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):

@@ -10,5 +10,5 @@ urlpatterns = [
     path('books/loaned/', viewLoanedBooks, name="view-loaned"),
     path('books/loan/', loanBookView, name="loan-book"),
     path('books/return/', returnBookView, name="return-book"),
-     path('book/rating/', rateView, name="rate-book"),
+    path('book/rating/<int:id>/', rateView, name="rate-book"),
 ]

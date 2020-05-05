@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from store.models import *
 from django.contrib.auth.decorators import login_required
@@ -13,10 +13,11 @@ def index(request):
 
 def bookDetailView(request, bid):
     template_name = 'store/book_detail.html'
-    books=get_object_or_404(Book, pk=bid)
-    count=BookCopy.objects.filter(books__exact=bid, status__exact=True).count()
+    num_books=Book.objects.all().count()
+    book=get_object_or_404(Book, pk=bid)
+    count=BookCopy.objects.filter(status=True, book__title=book.title).count()
     context = {
-        'book':books , # set this to an instance of the required book
+        'book':book , # set this to an instance of the required book
         'num_available':count , # set this to the number of copies of the book available, or 0 if the book isn't available
     }
     return render(request, template_name, context=context)
@@ -29,10 +30,7 @@ def bookListView(request):
                        # (i.e. the book search feature will also be implemented in this view)
     }
     get_data = request.GET
-    if (len(get_data)>0):
-        book=Book.objects.filter(title__icontains=get_data['title'], author__icontains=get_data['author'], genre__icontains=get_data['genre'])
-    else:
-        book=Book.objects.all()
+    book=Book.objects.filter(title__icontains=get_data.get('title',''), author__icontains=get_data.get('author',''), genre__icontains=get_data.get('genre',''))
     context['books']=book
     return render(request, template_name, context=context)
 
@@ -62,7 +60,7 @@ def loanBookView(request):
     If yes, then set the message to 'success', otherwise 'failure'
     '''
     book_id =request.POST['bid']# get the book id from post data
-    ref=BookCopy.objects.filter(book=book_id, status=True)
+    ref=BookCopy.objects.filter(book_id__exact=book_id, status=True)
     if ref:
         book=ref[0]
         book.status=False
@@ -95,7 +93,7 @@ def returnBookView(request):
         book.borrow_date=None
         book.status=True
         book.save()
-        msg='success'
+        msg="success"
     except:
         msg='failure'
     response_data['message']=msg
@@ -103,23 +101,22 @@ def returnBookView(request):
 
 @csrf_exempt
 @login_required
-def rateView(request, bid):
+def rateView(request, id):
     if request.method == "POST":
-        book = Book.objects.get(pk=bid)
-        rating = request.POST['rating']
-        user_rating=UserRating()
-        user_rating.book=book
-        user_rating.user=request.user
-        user_rating.rating=rating
+        book = Book.objects.get(pk=id)
         r1=UserRating.objects.filter(user=request.user,book=book)
+        user_rating = request.POST['user_rating']
+        rating=UserRating()
+        rating.book=book
+        rating.user=request.user
+        rating.rating=user_rating
         r1.delete()
         rating.save()
-        copies=UserRating.objects.filter(book=book)
+        other=UserRating.objects.filter(book=book)
         rating_sum = 0.0
-        for key in copies:
-            rating_sum += key.user_rating
-            rating_sum -= key.r1
-        book.rating = rating_sum/copies.count()
+        for key in other:
+            rating_sum += key.rating
+        book.rating = rating_sum/other.count()
         book.rating = round(book.rating,2)
         book.save()
         return redirect('store:book-list')
