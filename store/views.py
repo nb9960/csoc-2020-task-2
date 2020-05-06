@@ -14,8 +14,15 @@ def index(request):
 def bookDetailView(request, bid):
     template_name = 'store/book_detail.html'
     num_books=Book.objects.all().count()
-    book=get_object_or_404(Book, pk=bid)
-    count=BookCopy.objects.filter(status=True, book__title=book.title).count()
+
+    available=[]
+    for key in Book.objects.all():
+        available.append(key.id)
+    if bid in available:
+        book=Book.objects.filter(id=bid).first()
+        count=len(BookCopy.objects.filter(book=book, status=True))    
+    else:
+        return HttpResponse("Book not found!")
     context = {
         'book':book , # set this to an instance of the required book
         'num_available':count , # set this to the number of copies of the book available, or 0 if the book isn't available
@@ -30,7 +37,14 @@ def bookListView(request):
                        # (i.e. the book search feature will also be implemented in this view)
     }
     get_data = request.GET
-    book=Book.objects.filter(title__icontains=get_data.get('title',''), author__icontains=get_data.get('author',''), genre__icontains=get_data.get('genre',''))
+    
+    book=Book.objects.all()
+    if 'title' in get_data.keys():
+        book=book.filter(title__icontains=get_data['title'])
+    if 'author' in get_data.keys():
+        book=book.filter(title__icontains=get_data['author'])  
+    if 'genre' in get_data.keys():
+        book=book.filter(title__icontains=get_data['genre'])      
     context['books']=book
     return render(request, template_name, context=context)
 
@@ -61,7 +75,7 @@ def loanBookView(request):
     '''
     book_id =request.POST['bid']# get the book id from post data
     ref=BookCopy.objects.filter(book_id__exact=book_id, status=True)
-    if ref:
+    if ref.count()>0:
         book=ref[0]
         book.status=False
         book.borrower=request.user
